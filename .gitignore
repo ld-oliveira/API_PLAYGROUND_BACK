@@ -1,0 +1,40 @@
+# 🐍 Python / Django
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+*.pot
+*.mo
+
+# 📂 Banco de dados SQLite
+db.sqlite3
+*.sqlite3
+
+# 🔐 Variáveis de ambiente
+.env
+.env.*
+
+# 📦 Ambiente virtual (venv local)
+venv/
+ENV/
+.venv/
+
+# 🧪 Arquivos de teste temporários
+*.pytest_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.pyre/
+
+# 🛠 IDEs e editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 🗃 Sistema
+.DS_Store
+Thumbs.db
