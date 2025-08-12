@@ -2,26 +2,42 @@ from django.http import JsonResponse
 from clima.services.tomorrow_api import requisitar
 
 def previsao_dia_seguinte(request):
-    latitude = request.GET.get('lat')
-    longitude = request.GET.get('lon')
+    lat = request.GET.get('lat')
+    lon = request.GET.get('lon')
 
-    if not latitude or not longitude:
+    if not lat or not lon:
         return JsonResponse({'erro': 'Latitude e longitude são obrigatórios.'}, status=400)
 
     try:
         dados = requisitar("forecast", {
-            "location": f"{latitude},{longitude}",
+            "location": f"{lat},{lon}",
             "timesteps": "1d",
             "units": "metric",
-            "fields": "temperature,precipitationProbability",
+            "fields": "temperatureMax,temperatureMin,temperatureAvg,precipitationProbability,visibilityAvg,windSpeedAvg",
         })
 
         previsoes = dados.get("timelines", {}).get("daily", [])
-        if len(previsoes) < 2:
-            return JsonResponse({'erro': 'Não foi possível obter a previsão do dia seguinte.'}, status=404)
+        if len(previsoes) < 4:
+            return JsonResponse({'erro': 'Não há dados suficientes para amanhã, +2 e +3 dias.'}, status=404)
 
-        dia_seguinte = previsoes[1]
-        return JsonResponse(dia_seguinte, safe=False)
+        def pick(i):
+            v = previsoes[i].get("values", {})
+            return {
+                "min": v.get("temperatureMin"),
+                "max": v.get("temperatureMax"),
+                "avg": v.get("temperatureAvg"),
+                "chuva": v.get("precipitationProbability"),
+                "visib": v.get("visibilityAvg"),
+                "vento": v.get("windSpeedAvg"),
+                "time": previsoes[i].get("time"),
+            }
+
+        resultado = {
+            "amanha": pick(1),
+            "depois_de_amanha": pick(2),
+            "terceiro_dia": pick(3),
+        }
+        return JsonResponse(resultado)
 
     except Exception as e:
         return JsonResponse({'erro': str(e)}, status=500)
