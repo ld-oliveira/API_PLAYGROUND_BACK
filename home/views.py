@@ -3,4 +3,4 @@ from django.http import JsonResponse
 import requests
 
 def hello_world(request):
-    return JsonResponse({'mensagem': 'Olá, mundo!'})
+    return JsonResponse({'mensagem': 'Pag inicial ainda em projeto'})
