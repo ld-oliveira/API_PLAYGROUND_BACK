@@ -3,7 +3,7 @@ services:
     name: backend-django
     runtime: python
     buildCommand: ""
-    startCommand: gunicorn api_teste.wsgi:application
+    startCommand: gunicorn api_teste.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: api_teste.settings
