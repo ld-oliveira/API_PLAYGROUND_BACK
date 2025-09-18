@@ -5,7 +5,7 @@ services:
     buildCommand: |
       pip install -r requirements.txt
       python manage.py migrate --noinput
-    startCommand: gunicorn api_teste.wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: gunicorn api_teste.wsgi:application --bind 0.0.0.0:$PORT --access-logfile - --error-logfile -
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: api_teste.settings
