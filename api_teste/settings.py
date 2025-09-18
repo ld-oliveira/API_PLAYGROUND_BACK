@@ -2,6 +2,7 @@ from pathlib import Path
 from decouple import config
 import os
 import sys
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -62,11 +63,13 @@ WSGI_APPLICATION = 'api_teste.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}" if not DATABASE_URL else DATABASE_URL
+    )
 }
 
 
