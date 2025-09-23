@@ -6,11 +6,12 @@ from django.contrib.auth import authenticate, login as auth_login
 import json
 import logging
 from django.contrib.auth import logout as auth_logout
-
+from django.views.decorators.http import require_GET
+from django.shortcuts import get_object_or_404
 
 logger = logging.getLogger(__name__)
 
-@csrf_exempt #atenção ao usar isso. se possivel evitar.
+@csrf_exempt #atenção ao usar isso. se possivel evitar. 
 @require_POST
 def cadastro(request):
     try:
@@ -78,3 +79,18 @@ def logout_user(request):
         return JsonResponse({"status": "ok", "message": "Logout realizado com sucesso"})
     else:
         return JsonResponse({"error": "Usuário não está logado"})
+
+@require_GET
+def listar_usuarios(request):
+    usuarios = User.objects.all().values("id", "username", "email", "date_joined")
+    return JsonResponse(list(usuarios), safe=False)
+
+@require_GET
+def usuario_por_id(request, user_id):
+    usuario = get_object_or_404(User, id=user_id)
+    return JsonResponse({
+        "id": usuario.id,
+        "username": usuario.username,
+        "email": usuario.email,
+        "date_joined": usuario.date_joined,
+    })
