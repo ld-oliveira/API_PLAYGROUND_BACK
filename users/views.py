@@ -94,3 +94,4 @@ def usuario_por_id(request, user_id):
         "email": usuario.email,
         "date_joined": usuario.date_joined,
     })
+
