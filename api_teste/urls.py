@@ -7,4 +7,5 @@ urlpatterns = [
     path('clima/', include('clima.urls')),
     path('', include('home.urls')),
     path('users/', include('users.urls')),
+    path('pet/', include('meu_pet.urls')),
 ]
