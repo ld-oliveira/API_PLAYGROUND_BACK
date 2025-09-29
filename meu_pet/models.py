@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 class Animal(models.Model):
     nome = models.CharField(max_length=30)
-    idade = models.IntegerField(max_length=3)
+    idade = models.IntegerField()
     foto = models.ImageField(upload_to='fotos_animais')
     descricao = models.TextField()
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)  
