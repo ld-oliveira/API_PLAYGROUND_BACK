@@ -1,17 +1,26 @@
 from django.contrib.auth.models import User
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.contrib.auth import authenticate, login as auth_login
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.shortcuts import get_object_or_404
+from django.middleware.csrf import get_token
 import json
 import logging
-from django.contrib.auth import logout as auth_logout
-from django.views.decorators.http import require_GET
-from django.shortcuts import get_object_or_404
 
 logger = logging.getLogger(__name__)
 
-@csrf_exempt #atenção ao usar isso. se possivel evitar. 
+
+# --- CSRF ---
+@ensure_csrf_cookie
+def csrf_token(request):
+    """
+    Gera/atualiza o cookie 'csrftoken' e devolve também o valor no JSON (opcional).
+    """
+    return JsonResponse({"csrfToken": get_token(request)})
+
+
+
 @require_POST
 def cadastro(request):
     try:
@@ -33,7 +42,7 @@ def cadastro(request):
     if senha_1 != senha_2:
         return JsonResponse({"error": "As senhas não coincidem"})
 
-    if User.objects.filter(username__iexact=nome).exists(): #iexact = evitar problemas com maiusculas e minusculas
+    if User.objects.filter(username__iexact=nome).exists():
         return JsonResponse({"error": "Usuário já existe"})
 
     if User.objects.filter(email__iexact=email).exists():
@@ -47,7 +56,7 @@ def cadastro(request):
         return JsonResponse({"error": "Erro ao criar usuário", "details": str(e)})
 
 
-@csrf_exempt
+
 @require_POST
 def login_user(request):
     try:
@@ -67,11 +76,13 @@ def login_user(request):
     user = authenticate(request, username=nome, password=senha)
 
     if user is not None:
-        auth_login(request, user)
+        auth_login(request, user)  # cria a sessão e gera cookie 'sessionid'
         return JsonResponse({"status": "ok", "message": "Login realizado com sucesso"})
     else:
         return JsonResponse({"error": "Usuário ou senha inválidos"})
-    
+
+
+
 @require_POST
 def logout_user(request):
     if request.user.is_authenticated:
@@ -80,10 +91,14 @@ def logout_user(request):
     else:
         return JsonResponse({"error": "Usuário não está logado"})
 
+
+
 @require_GET
 def listar_usuarios(request):
     usuarios = User.objects.all().values("id", "username", "email", "date_joined")
     return JsonResponse(list(usuarios), safe=False)
+
+
 
 @require_GET
 def usuario_por_id(request, user_id):
@@ -94,4 +109,3 @@ def usuario_por_id(request, user_id):
         "email": usuario.email,
         "date_joined": usuario.date_joined,
     })
-
