@@ -14,12 +14,17 @@ logger = logging.getLogger(__name__)
 # --- CSRF ---
 @ensure_csrf_cookie
 def csrf_token(request):
-    """
-    Gera/atualiza o cookie 'csrftoken' e devolve também o valor no JSON (opcional).
-    """
-    return JsonResponse({"csrfToken": get_token(request)})
-
-
+    token = get_token(request)
+    response = JsonResponse({"csrfToken": token})
+    response.set_cookie(
+        "csrftoken",
+        token,
+        max_age=60*60*24,  # 1 dia
+        secure=True,
+        httponly=False,
+        samesite="None",
+    )
+    return response
 
 @require_POST
 def cadastro(request):
