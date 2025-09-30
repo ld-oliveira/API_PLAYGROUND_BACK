@@ -53,8 +53,6 @@ def cadastro(request):
         logger.error("Erro ao criar usuário: %s", e)
         return JsonResponse({"error": "Erro ao criar usuário", "details": str(e)})
 
-
-
 @require_POST
 def login_user(request):
     try:
