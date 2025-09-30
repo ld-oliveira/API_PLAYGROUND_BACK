@@ -126,7 +126,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://api-playground-front.vercel.app",   # produção
 ]
 CORS_ALLOW_CREDENTIALS = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
@@ -135,9 +135,12 @@ SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
+    "https://ld-oliveira.com"
     "http://127.0.0.1:8000",
     "https://api-playground-front.vercel.app",
 ]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 LOGGING = {
     "version": 1,
