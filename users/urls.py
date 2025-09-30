@@ -1,8 +1,8 @@
 from django.urls import path
-from users.views import csrf_token,cadastro,login_user,logout_user,listar_usuarios,usuario_por_id
+from users.views import get_csrf,cadastro,login_user,logout_user,listar_usuarios,usuario_por_id
 
 urlpatterns = [
-    path("csrf/", csrf_token, name="csrf"),
+    path("csrf/", get_csrf, name="csrf"),
     path("cadastro/", cadastro, name="cadastro"),
     path("login/", login_user, name="login"),
     path("logout/", logout_user, name="logout"),
