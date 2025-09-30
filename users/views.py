@@ -11,20 +11,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# --- CSRF ---
 @ensure_csrf_cookie
-def csrf_token(request):
+def get_csrf(request):
+    """
+    Retorna o CSRF token em JSON e garante que o cookie 'csrftoken' seja setado.
+    """
     token = get_token(request)
-    response = JsonResponse({"csrfToken": token})
-    response.set_cookie(
-        "csrftoken",
-        token,
-        max_age=60*60*24,  # 1 dia
-        secure=True,
-        httponly=False,
-        samesite="None",
-    )
-    return response
+    return JsonResponse({"csrfToken": token})
 
 @require_POST
 def cadastro(request):
