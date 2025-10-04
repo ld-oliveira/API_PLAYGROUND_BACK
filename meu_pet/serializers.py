@@ -11,5 +11,5 @@ class AnimalSerializer(serializers.ModelSerializer):
 
     def get_usuario(self, obj):
         if obj.usuario:
-            return obj.usuario.username
+            return {"id": obj.usuario.id, "username": obj.usuario.username}
         return None
