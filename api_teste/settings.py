@@ -36,7 +36,7 @@ cloudinary.config(
 
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-MEDIA_URL = ''  # Cloudinary gerencia a URL final
+MEDIA_URL = '/media/'
 
 print("🔍 Cloudinary diagnostic:")
 print("CLOUD_NAME:", cloudinary.config().cloud_name)

@@ -11,5 +11,3 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('pet/', include('meu_pet.urls')),
 ]
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

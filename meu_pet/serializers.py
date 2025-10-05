@@ -3,6 +3,7 @@ from .models import Animal
 
 class AnimalSerializer(serializers.ModelSerializer):
     usuario = serializers.SerializerMethodField()
+    foto = serializers.ImageField(use_url=True, allow_null=True, required=False)
 
     class Meta:
         model = Animal
