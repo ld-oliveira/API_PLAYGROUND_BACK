@@ -22,10 +22,11 @@ print("🔍 Cloudinary diagnostic:")
 print("CLOUD_NAME:", cloudinary.config().cloud_name)
 print("API_KEY:", cloudinary.config().api_key)
 print("API_SECRET:", str(cloudinary.config().api_secret)[:6] + "********")
-print("STORAGE:", DEFAULT_FILE_STORAGE)
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
+
+print("STORAGE:", DEFAULT_FILE_STORAGE)
 
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 
