@@ -18,6 +18,13 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET')
 }
 
+print("🔎 CLOUDINARY DIAGNOSTIC:")
+print(" - CLOUD_NAME:", os.getenv("CLOUDINARY_CLOUD_NAME"))
+print(" - API_KEY:", os.getenv("CLOUDINARY_API_KEY"))
+print(" - API_SECRET:", os.getenv("CLOUDINARY_API_SECRET"))
+print(" - STORAGE:", DEFAULT_FILE_STORAGE)
+
+
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
 
