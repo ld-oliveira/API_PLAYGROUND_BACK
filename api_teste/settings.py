@@ -4,13 +4,23 @@ import os
 import sys
 import dj_database_url
 from dotenv import load_dotenv
-from pathlib import Path
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
+
+# === Diretórios e variáveis ===
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
+
+
+# === Cloudinary ===
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+    secure=True
+)
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
@@ -18,26 +28,23 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET')
 }
 
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+MEDIA_URL = ''  # Cloudinary gerencia a URL final
+
 print("🔍 Cloudinary diagnostic:")
 print("CLOUD_NAME:", cloudinary.config().cloud_name)
 print("API_KEY:", cloudinary.config().api_key)
 print("API_SECRET:", str(cloudinary.config().api_secret)[:6] + "********")
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-MEDIA_URL = '/media/'
-
 print("STORAGE:", DEFAULT_FILE_STORAGE)
 
+
+# === Configurações Django ===
 SECRET_KEY = config('DJANGO_SECRET_KEY')
-
 DEBUG = config('DEBUG', default=False, cast=bool)
-
-# Hosts aceitos
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 
-# Application definition
-
+# === Aplicações instaladas ===
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -45,18 +52,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
+    # Cloudinary
     'cloudinary',
     'cloudinary_storage',
-    
+
+    # Apps do projeto
     'rest_framework',
     'clima',
     'corsheaders',
     'users',
     'meu_pet',
-    
 ]
 
+
+# === Middleware ===
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -69,8 +79,13 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'api_teste.urls'
 
+# === URLs e WSGI ===
+ROOT_URLCONF = 'api_teste.urls'
+WSGI_APPLICATION = 'api_teste.wsgi.application'
+
+
+# === Templates ===
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -86,12 +101,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'api_teste.wsgi.application'
 
-
-# Database
+# === Banco de dados ===
 DATABASE_URL = os.environ.get("DATABASE_URL")
-
 DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}" if not DATABASE_URL else DATABASE_URL
@@ -99,74 +111,55 @@ DATABASES = {
 }
 
 
-# Password validation
+# === Validação de senha ===
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 
-# Internationalization
+# === Internacionalização ===
 LANGUAGE_CODE = 'pt-br'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
-# Static files
+# === Arquivos estáticos ===
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+
+# === Auto field padrão ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# CORS
+# === CORS ===
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 CORS_ALLOW_CREDENTIALS = True
 
 
-# CSRF
+# === CSRF ===
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
-
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
-
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 
-# Proxy SSL (Render usa proxy HTTPS)
+# === Proxy HTTPS (Render) ===
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
-# Logs
+# === Logs ===
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "stream": sys.stdout,
-        },
+        "console": {"class": "logging.StreamHandler", "stream": sys.stdout},
     },
-    "root": {
-        "handlers": ["console"],
-        "level": "DEBUG",
-    },
+    "root": {"handlers": ["console"], "level": "DEBUG"},
 }
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
