@@ -105,3 +105,14 @@ def usuario_por_id(request, user_id):
         "email": usuario.email,
         "date_joined": usuario.date_joined,
     })
+
+@require_GET
+def me(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"detail": "Not authenticated"}, status=401)
+    u = request.user
+    return JsonResponse({
+        "id": u.id,
+        "username": u.username,
+        "email": u.email,
+    })
