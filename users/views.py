@@ -17,7 +17,11 @@ def get_csrf(request):
     Retorna o CSRF token em JSON e garante que o cookie 'csrftoken' seja setado.
     """
     token = get_token(request)
-    return JsonResponse({"csrfToken": token})
+    resp = JsonResponse({"csrfToken": token})
+    resp["Set-Cookie"] = (
+        f"csrftoken={token}; Path=/; Secure; SameSite=None; Partitioned"
+    )
+    return resp
 
 @require_POST
 def cadastro(request):
