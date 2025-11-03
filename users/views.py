@@ -28,7 +28,7 @@ def cadastro(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
     except json.JSONDecodeError as e:
-        return JsonResponse({"error": "JSON inválido", "message": str(e)})
+        return JsonResponse({"error": "JSON inválido", "message": str(e)}, status=400)
 
     nome = data.get("nome_cad")
     email = data.get("email_cad")
@@ -39,30 +39,31 @@ def cadastro(request):
         return JsonResponse({
             "error": "Todos os campos são obrigatórios",
             "received_data": {"nome": nome, "email": email}
-        })
+        }, status=400)
 
     if senha_1 != senha_2:
-        return JsonResponse({"error": "As senhas não coincidem"})
+        return JsonResponse({"error": "As senhas não coincidem"}, status=400)
 
     if User.objects.filter(username__iexact=nome).exists():
-        return JsonResponse({"error": "Usuário já existe"})
+        return JsonResponse({"error": "Usuário já existe"}, status=409)
 
     if User.objects.filter(email__iexact=email).exists():
-        return JsonResponse({"error": "Email já cadastrado"})
+        return JsonResponse({"error": "Email já cadastrado"}, status=409)
 
     try:
-        User.objects.create_user(username=nome, email=email, password=senha_1)
-        return JsonResponse({"status": "ok", "message": "Cadastro realizado com sucesso"})
+        user = User.objects.create_user(username=nome, email=email, password=senha_1)
+        return JsonResponse({"status": "ok", "message": "Cadastro realizado com sucesso", "id": user.id}, status=201)
     except Exception as e:
         logger.error("Erro ao criar usuário: %s", e)
-        return JsonResponse({"error": "Erro ao criar usuário", "details": str(e)})
+        return JsonResponse({"error": "Erro ao criar usuário", "details": str(e)}, status=500)
+
 
 @require_POST
 def login_user(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
     except json.JSONDecodeError as e:
-        return JsonResponse({"error": "JSON inválido", "message": str(e)})
+        return JsonResponse({"error": "JSON inválido", "message": str(e)}, status=400)
 
     nome = data.get("nome_login")
     senha = data.get("senha_login")
@@ -71,25 +72,33 @@ def login_user(request):
         return JsonResponse({
             "error": "Todos os campos são obrigatórios",
             "received_data": {"nome": nome}
-        })
+        }, status=400)
 
     user = authenticate(request, username=nome, password=senha)
 
-    if user is not None:
-        auth_login(request, user)  # cria a sessão e gera cookie 'sessionid'
-        return JsonResponse({"status": "ok", "message": "Login realizado com sucesso"})
-    else:
-        return JsonResponse({"error": "Usuário ou senha inválidos"})
+    if user is None:
+        return JsonResponse({"error": "Usuário ou senha inválidos"}, status=401)
 
-
+    auth_login(request, user)
+    return JsonResponse({
+        "status": "ok",
+        "message": "Login realizado com sucesso",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "is_staff": user.is_staff,
+            "is_superuser": user.is_superuser,
+        }
+    }, status=200)
 
 @require_POST
 def logout_user(request):
     if request.user.is_authenticated:
         auth_logout(request)
         return JsonResponse({"status": "ok", "message": "Logout realizado com sucesso"})
-    else:
-        return JsonResponse({"error": "Usuário não está logado"})
+    return JsonResponse({"error": "Usuário não está logado"}, status=401)
+
 
 
 
@@ -119,4 +128,7 @@ def me(request):
         "id": u.id,
         "username": u.username,
         "email": u.email,
-    })
+        "is_staff": u.is_staff,
+        "is_superuser": u.is_superuser,
+        "is_authenticated": True,
+    }, status=200)
