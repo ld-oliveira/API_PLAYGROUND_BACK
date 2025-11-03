@@ -6,7 +6,7 @@ class Animal(models.Model):
     nome = models.CharField(max_length=30)
     idade = models.IntegerField()
     foto = models.ImageField(storage=MediaCloudinaryStorage(), upload_to='fotos_animais')
-    descricao = models.TextField()
+    descricao = models.TextField(max_length=350)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     criado_em = models.DateTimeField(auto_now_add=True)
 

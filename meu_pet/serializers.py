@@ -4,6 +4,7 @@ from .models import Animal
 class AnimalSerializer(serializers.ModelSerializer):
     usuario = serializers.SerializerMethodField()
     foto = serializers.ImageField(use_url=True, allow_null=True, required=False)
+    descricao = serializers.CharField(max_length=350)
 
     class Meta:
         model = Animal
