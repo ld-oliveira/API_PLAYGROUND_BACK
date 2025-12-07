@@ -3,12 +3,15 @@ from .models import Animal
 from .serializers import AnimalSerializer
 
 class AnimalListCreateView(generics.ListCreateAPIView):
-    queryset = Animal.objects.all()
     serializer_class = AnimalSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_queryset(self):
+        return Animal.objects.all().order_by("is_generico", "-criado_em")
+
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
+
 
 class AnimalDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AnimalSerializer
