@@ -12,6 +12,10 @@ class AnimalSerializer(serializers.ModelSerializer):
         read_only_fields = ['usuario', 'criado_em']
 
     def get_usuario(self, obj):
-        if obj.usuario:
-            return {"id": obj.usuario.id, "username": obj.usuario.username}
+        usuario = getattr(obj, "usuario", None)
+        if usuario is not None:
+            return {
+                "id": usuario.id,
+                "username": usuario.username
+        }
         return None

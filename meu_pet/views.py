@@ -22,3 +22,4 @@ class AnimalDetailView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user.is_authenticated:
             return Animal.objects.filter(usuario=self.request.user)
         return Animal.objects.none()
+
