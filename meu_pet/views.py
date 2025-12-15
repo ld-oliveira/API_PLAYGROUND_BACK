@@ -7,10 +7,27 @@ class AnimalListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return Animal.objects.all().order_by("is_generico", "-criado_em")
+        LIMITE = 60
+
+        reais = list(
+            Animal.objects.filter(is_generico=False).order_by("-criado_em")[:LIMITE]
+        )
+
+        faltam = LIMITE - len(reais)
+
+        if faltam > 0:
+            genericos = list(
+                Animal.objects.filter(is_generico=True).order_by("-criado_em")[:faltam]
+            )
+        else:
+            genericos = []
+
+        # Reais primeiro, depois genéricos, total = 60
+        return reais + genericos
 
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
+
 
 
 class AnimalDetailView(generics.RetrieveUpdateDestroyAPIView):
