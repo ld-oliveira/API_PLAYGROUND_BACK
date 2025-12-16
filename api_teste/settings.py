@@ -14,6 +14,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 
+# === Helper ESSENCIAL para variáveis CSV do .env ===
+def csv_env(name: str):
+    raw = os.getenv(name, "")
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
 # === Cloudinary ===
 cloudinary.config(
     cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
@@ -28,27 +34,15 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET')
 }
 
-cloudinary.config( 
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
-)
-
-
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
-
-print("🔍 Cloudinary diagnostic:")
-print("CLOUD_NAME:", cloudinary.config().cloud_name)
-print("API_KEY:", cloudinary.config().api_key)
-print("API_SECRET:", str(cloudinary.config().api_secret)[:6] + "********")
-print("STORAGE:", DEFAULT_FILE_STORAGE)
 
 
 # === Configurações Django ===
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+
+ALLOWED_HOSTS = csv_env("ALLOWED_HOSTS")
 
 
 # === Aplicações instaladas ===
@@ -60,14 +54,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Cloudinary
     'cloudinary',
     'cloudinary_storage',
 
-    # Apps do projeto
     'rest_framework',
-    'clima',
     'corsheaders',
+
+    'clima',
     'users',
     'meu_pet',
 ]
@@ -77,10 +70,15 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
+
+    # CORS precisa rodar cedo
     "corsheaders.middleware.CorsMiddleware",
+
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+
     'users.middleware.JsonCsrfMiddleware',
+
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -145,18 +143,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # === CORS ===
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS_ALLOWED_ORIGINS = csv_env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
 
 
-# === CSRF ===
+# === CSRF / Sessão ===
+CSRF_TRUSTED_ORIGINS = csv_env("CSRF_TRUSTED_ORIGINS")
+
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
+
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
-
 
 
 # === Proxy HTTPS (Render) ===
