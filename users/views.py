@@ -6,7 +6,13 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.shortcuts import get_object_or_404
 from django.middleware.csrf import get_token
 import json
+from django.utils import timezone
+from datetime import timedelta
+import secrets
 import logging
+from .models import PasswordResetToken
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +63,6 @@ def cadastro(request):
         logger.error("Erro ao criar usuário: %s", e)
         return JsonResponse({"error": "Erro ao criar usuário", "details": str(e)}, status=500)
 
-
 @require_POST
 def login_user(request):
     try:
@@ -99,15 +104,10 @@ def logout_user(request):
         return JsonResponse({"status": "ok", "message": "Logout realizado com sucesso"})
     return JsonResponse({"error": "Usuário não está logado"}, status=401)
 
-
-
-
 @require_GET
 def listar_usuarios(request):
     usuarios = User.objects.all().values("id", "username", "email", "date_joined")
     return JsonResponse(list(usuarios), safe=False)
-
-
 
 @require_GET
 def usuario_por_id(request, user_id):
@@ -132,3 +132,47 @@ def me(request):
         "is_superuser": u.is_superuser,
         "is_authenticated": True,
     }, status=200)
+
+@require_POST
+def esqueci_senha(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError as e:
+        return JsonResponse(
+            {"error": "JSON inválido", "message": str(e)},
+            status=400
+        )
+
+    email = data.get("email")
+
+    if not email:
+        return JsonResponse(
+            {"error": "Email é obrigatório"},
+            status=400
+        )
+
+    email = email.strip().lower()
+
+    try:
+        user = User.objects.get(email__iexact=email)
+    except User.DoesNotExist:
+        return JsonResponse(
+            {"message": "Se este e-mail estiver cadastrado, você receberá um link para redefinir a senha."},
+            status=200
+        )
+
+    token = secrets.token_urlsafe(48)
+
+    expires_at = timezone.now() + timedelta(minutes=30)
+
+    PasswordResetToken.objects.create(
+        user=user,
+        token=token,
+        expires_at=expires_at
+    )
+
+    return JsonResponse(
+        {"message": "Se este e-mail estiver cadastrado, você receberá um link para redefinir a senha."},
+        status=200
+    )
+
